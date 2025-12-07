@@ -472,7 +472,7 @@
                     return;
                 }
 
-                emailjs.send("service_wpwe6kc", "template_xxxx", params)
+                emailjs.send("service_wpwe6kc", "template_d8oxo67", params)
                     .then(() => {
                         stat.innerText = "Sent Successfully";
                         stat.style.color = "var(--success)";
@@ -771,42 +771,15 @@
                     const pos = new Float32Array(5000 * 3);
                     geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
                     
-                    // Custom shader for smooth point rendering with gl_PointCoord distance fading
-                    const vertexShader = `
-                        attribute vec3 position;
-                        uniform mat4 modelViewMatrix;
-                        uniform mat4 projectionMatrix;
-                        uniform float size;
-                        void main() {
-                            vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
-                            gl_PointSize = size * (300.0 / -mvPosition.z);
-                            gl_Position = projectionMatrix * mvPosition;
-                        }
-                    `;
-                    
-                    const fragmentShader = `
-                        uniform vec3 color;
-                        uniform float opacity;
-                        void main() {
-                            // Smooth edge fading using gl_PointCoord distance from center
-                            vec2 center = gl_PointCoord - vec2(0.5);
-                            float dist = length(center);
-                            float alpha = 1.0 - smoothstep(0.0, 0.5, dist * 2.0);
-                            gl_FragColor = vec4(color, opacity * alpha);
-                        }
-                    `;
-                    
-                    // Use custom shader material for enhanced antialiasing
-                    const mat = new THREE.ShaderMaterial({
-                        uniforms: {
-                            color: { value: new THREE.Color(0xffffff) },
-                            opacity: { value: 0.8 },
-                            size: { value: 0.4 }
-                        },
-                        vertexShader: vertexShader,
-                        fragmentShader: fragmentShader,
+                    // Use PointsMaterial with enhanced settings for reliable rendering
+                    // PointsMaterial automatically handles matrix uniforms and point rendering
+                    const mat = new THREE.PointsMaterial({
+                        size: 0.4,
+                        color: 0xffffff,
                         transparent: true,
-                        depthWrite: false
+                        opacity: 0.8,
+                        sizeAttenuation: true, // Points get smaller with distance
+                        vertexColors: false
                     });
                     
                     Visuals.points = new THREE.Points(geo, mat);
@@ -853,13 +826,8 @@
                     currentColor.multiplyScalar(0.15); // Darken for light mode
                 }
                 
-                // Update shader uniform (for custom shader material)
-                if (Visuals.points.material.uniforms) {
-                    Visuals.points.material.uniforms.color.value.copy(currentColor);
-                } else {
-                    // Fallback for PointsMaterial
-                    Visuals.points.material.color.copy(currentColor);
-                } 
+                // Update PointsMaterial color (works directly with material.color)
+                Visuals.points.material.color.copy(currentColor); 
 
                 for(let i=0; i<5000; i++) {
                     const i3 = i*3;
