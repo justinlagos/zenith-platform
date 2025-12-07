@@ -3,24 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ZENITH: Clinical Resonance v3.4 (Instructional)</title>
+    <title>ZENITH: Clinical Resonance v5.0</title>
     
-    <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
-        /* --- DYNAMIC THEME SYSTEM --- */
+        /* --- SWISS MEDICAL SYSTEM v5.0 --- */
         :root {
             --bg-base: #050505;
-            --bg-panel: #0F0F0F;
+            --bg-panel: #0A0A0A;
             --border: rgba(255, 255, 255, 0.12);
+            --border-hover: rgba(255, 255, 255, 0.3);
             --text-pri: #F0F2F5;
             --text-sec: #888899;
             --accent: #00A3FF; 
             --success: #34C759;
             --alert: #FF3B30;
-            --warning: #FF9500;
             --radius: 4px;
         }
 
@@ -28,7 +27,8 @@
             --bg-base: #F5F7FA;
             --bg-panel: #FFFFFF;
             --border: rgba(0, 0, 0, 0.1);
-            --text-pri: #1A1A1A;
+            --border-hover: rgba(0, 0, 0, 0.2);
+            --text-pri: #111111;
             --text-sec: #555566;
             --accent: #0066CC;
         }
@@ -39,579 +39,584 @@
             background-color: var(--bg-base); color: var(--text-pri);
             font-family: 'Inter', sans-serif;
             overflow: hidden; height: 100vh; width: 100vw;
-            transition: background-color 0.4s ease, color 0.4s ease;
+            transition: background 0.4s ease;
         }
 
-        /* UTILITIES */
-        .t-hero { font-size: 48px; letter-spacing: -0.04em; font-weight: 600; line-height: 1.1; }
-        .t-h2 { font-size: 24px; font-weight: 500; letter-spacing: -0.02em; }
-        .t-h3 { font-size: 16px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
-        .t-mono { font-family: 'JetBrains Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; }
-        .t-body { font-size: 15px; line-height: 1.6; color: var(--text-sec); }
-        .t-muted { color: var(--text-sec); }
-        .t-accent { color: var(--accent); }
-
-        /* VIEW MANAGEMENT */
-        .view { 
-            position: absolute; inset: 0; 
-            display: none; 
-            padding: 32px; overflow-y: auto; 
-            opacity: 0; transition: opacity 0.5s ease; 
-            z-index: 5; 
-        }
+        /* LAYOUT & VISIBILITY */
+        #canvas-layer { position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: 0.6; transition: opacity 1s; }
+        
+        /* VIEWS */
+        .view { position: absolute; inset: 0; display: none; padding: 40px; overflow-y: auto; z-index: 10; opacity: 0; transition: opacity 0.5s ease; }
         .view.active { display: block; opacity: 1; }
         
-        .container { max-width: 1100px; margin: 0 auto; min-height: 100%; display: flex; flex-direction: column; }
+        .container { max-width: 1200px; margin: 0 auto; height: 100%; display: flex; flex-direction: column; }
         .center-col { align-items: center; justify-content: center; text-align: center; }
         
-        /* UI ELEMENTS */
-        .theme-toggle {
-            position: absolute; top: 32px; right: 32px; z-index: 50;
-            width: 40px; height: 40px; border-radius: 50%;
-            border: 1px solid var(--border); background: var(--bg-panel);
-            color: var(--text-pri); display: flex; align-items: center; justify-content: center;
-            cursor: pointer; transition: 0.2s;
-        }
-        .theme-toggle:hover { border-color: var(--accent); color: var(--accent); }
+        /* TYPOGRAPHY */
+        .t-hero { font-size: 56px; font-weight: 500; letter-spacing: -0.04em; line-height: 1.1; margin-bottom: 24px; }
+        .t-h2 { font-size: 24px; font-weight: 600; letter-spacing: -0.02em; margin-bottom: 12px; }
+        .t-h3 { font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-pri); }
+        .t-mono { font-family: 'JetBrains Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-sec); display: block; margin-bottom: 8px; }
+        .t-body { font-size: 15px; line-height: 1.6; color: var(--text-sec); margin-bottom: 24px; }
+        .t-sm { font-size: 13px; line-height: 1.5; color: var(--text-sec); }
+        .t-accent { color: var(--accent); }
 
-        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; width: 100%; padding-bottom: 40px; }
-        
-        .card {
-            border: 1px solid var(--border); background: var(--bg-panel);
-            padding: 24px; transition: 0.1s; cursor: pointer; border-radius: var(--radius);
-            display: flex; flex-direction: column; justify-content: space-between;
-            min-height: 220px; user-select: none;
-        }
-        .card:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
-        .card:active { transform: scale(0.98); background: var(--accent); color: white; }
-        .card:active p, .card:active .t-muted { color: rgba(255,255,255,0.8); }
-
+        /* INTERACTIVE ELEMENTS */
         .btn {
             background: var(--text-pri); color: var(--bg-base);
             padding: 14px 28px; border: 1px solid var(--text-pri);
-            font-family: 'JetBrains Mono', monospace; font-size: 12px;
-            cursor: pointer; transition: 0.2s; text-transform: uppercase; font-weight: 700;
-            border-radius: var(--radius); display: inline-flex; align-items: center; gap: 10px;
+            font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 700;
+            cursor: pointer; transition: 0.2s; border-radius: var(--radius);
+            pointer-events: auto;
         }
-        .btn:hover { opacity: 0.8; }
+        .btn:hover { background: var(--accent); border-color: var(--accent); color: white; transform: translateY(-1px); }
+        
         .btn-ghost { background: transparent; color: var(--text-pri); border: 1px solid var(--border); }
         .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
 
-        input {
+        .card {
+            border: 1px solid var(--border); background: var(--bg-panel);
+            padding: 32px; transition: 0.2s; cursor: pointer; border-radius: var(--radius);
+            display: flex; flex-direction: column; justify-content: space-between;
+            min-height: 260px; pointer-events: auto;
+        }
+        .card:hover { border-color: var(--accent); transform: translateY(-4px); box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
+
+        .input-field {
             background: transparent; border: none; border-bottom: 1px solid var(--border);
-            color: var(--text-pri); font-size: 18px; padding: 12px 0; width: 100%;
-            font-family: 'Inter', sans-serif; outline: none; margin-bottom: 24px;
+            color: var(--text-pri); font-size: 20px; padding: 12px 0; width: 100%;
+            font-family: 'Inter', sans-serif; outline: none; margin-bottom: 24px; pointer-events: auto;
         }
-        input:focus { border-color: var(--accent); }
+        .input-field:focus { border-color: var(--accent); }
 
-        /* VISUALIZER */
-        #canvas-layer { position: fixed; inset: 0; z-index: 1; opacity: 0; transition: opacity 1s; }
-        #canvas-layer.active { opacity: 1; }
-        video { display: none; }
+        /* GRID */
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; width: 100%; }
+        @media (max-width: 900px) { .grid-3 { grid-template-columns: 1fr; } }
 
-        /* HUD & DASHBOARD */
-        #hud-layer {
-            position: absolute; inset: 0; pointer-events: none; z-index: 20;
-            padding: 32px; display: flex; flex-direction: column; justify-content: space-between;
+        /* HUD */
+        #hud {
+            position: fixed; inset: 0; z-index: 50; padding: 40px;
+            display: none; flex-direction: column; justify-content: space-between;
+            pointer-events: none;
         }
+        #hud.active { display: flex; }
         .hud-row { display: flex; justify-content: space-between; align-items: flex-end; }
-        .big-val { font-family: 'JetBrains Mono'; font-size: 48px; font-weight: 300; line-height: 1; }
+        .metric-big { font-family: 'JetBrains Mono'; font-size: 64px; line-height: 1; font-weight: 300; }
 
-        .dash-grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 40px; margin-top: 40px; }
-        .insight-panel { 
-            background: var(--bg-panel); border-left: 4px solid var(--success); 
-            padding: 24px; border-radius: 0 var(--radius) var(--radius) 0;
+        /* MODALS */
+        .modal-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.9); backdrop-filter: blur(8px);
+            z-index: 100; display: none; align-items: center; justify-content: center;
         }
-        .stat-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border); }
-        .chart-box { height: 120px; display: flex; align-items: flex-end; gap: 8px; padding-top: 20px; }
-        .chart-bar { flex: 1; background: var(--accent); opacity: 0.3; transition: height 0.5s; border-radius: 2px 2px 0 0; }
-        .chart-bar.current { opacity: 1; }
+        .modal-overlay.active { display: flex; }
+        .modal-box { width: 100%; max-width: 450px; text-align: center; }
 
+        /* RESULTS */
+        .dash-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 40px; margin-top: 40px; }
+        .insight-box { border-left: 3px solid var(--accent); padding-left: 24px; }
+        .chart-bar { flex: 1; background: var(--accent); opacity: 0.3; transition: height 0.6s; border-radius: 2px 2px 0 0; }
+        .chart-bar.filled { opacity: 1; }
+
+        /* THEME BTN */
+        .theme-btn {
+            position: fixed; top: 32px; right: 32px; z-index: 100;
+            width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--border);
+            color: var(--text-pri); display: flex; align-items: center; justify-content: center; cursor: pointer; pointer-events: auto;
+        }
+        video { display: none; }
     </style>
     
-    <!-- Libs -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+    <!-- EMAIL JS SDK -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 </head>
 <body>
 
-    <video id="input_video" playsinline></video>
     <div id="canvas-layer"></div>
-
-    <button class="theme-toggle" onclick="Theme.toggle()"><i class="fas fa-adjust"></i></button>
+    <video id="input_video" playsinline></video>
+    <div class="theme-btn" onclick="Theme.toggle()"><i class="fas fa-adjust"></i></div>
 
     <!-- 1. LANDING -->
     <section id="v-landing" class="view active" style="z-index: 30;">
         <div class="container center-col">
-            <div class="t-mono t-accent" style="margin-bottom: 24px;">CLINICAL RESONANCE PLATFORM v3.4</div>
-            <h1 class="t-hero">ZENITH</h1>
+            <div style="height: 10vh;"></div>
+            <span class="t-mono t-accent">PRESCRIPTIVE DIGITAL THERAPEUTICS</span>
+            <h1 class="t-hero">ZENITH v5.0</h1>
             <p class="t-body" style="max-width: 500px; margin: 24px auto;">
-                A prescriptive digital therapeutic tool. We use computer vision to translate your biological rhythms into visual structure, helping you regulate anxiety, tremors, and focus drift.
+                A scientific interface for your nervous system. By translating biological signals into structured visualizations, we help you regulate anxiety, tremors, and focus drift.
             </p>
-            <button class="btn" onclick="UI.showModal('modal-intake')">BEGIN THERAPY</button>
+            <button class="btn" onclick="UI.showModal('modal-intake')">Initialize Session</button>
+            
+            <div class="grid-3" style="margin-top: 80px; text-align: left; padding-top: 40px; border-top: 1px solid var(--border);">
+                <div>
+                    <span class="t-mono t-accent">01 • CONNECT</span>
+                    <h3 class="t-h3" style="margin-top:12px">BIOMETRIC SENSING</h3>
+                    <p class="t-sm" style="margin-top:8px">Secure computer vision tracks fine motor control and autonomic jitter in real-time.</p>
+                </div>
+                <div>
+                    <span class="t-mono t-accent">02 • VISUALIZE</span>
+                    <h3 class="t-h3" style="margin-top:12px">NEURO-MIRRORING</h3>
+                    <p class="t-sm" style="margin-top:8px">Internal states projected onto digital grids. Calm biology creates order; stress creates chaos.</p>
+                </div>
+                <div>
+                    <span class="t-mono t-accent">03 • ANALYZE</span>
+                    <h3 class="t-h3" style="margin-top:12px">PREDICTIVE HEALTH</h3>
+                    <p class="t-sm" style="margin-top:8px">Receive clinical reports detailing stability improvements and signs of cognitive fatigue.</p>
+                </div>
+            </div>
         </div>
     </section>
 
     <!-- MODAL: INTAKE -->
-    <div id="modal-intake" class="view" style="background: rgba(0,0,0,0.9); backdrop-filter: blur(5px); z-index: 100;">
-        <div class="container center-col" style="justify-content: center; max-width: 450px;">
-            <div class="t-mono t-muted" style="text-align: left; width: 100%; margin-bottom: 30px;">PATIENT CHECK-IN</div>
-            <input type="text" id="in-name" placeholder="First Name">
-            <input type="email" id="in-email" placeholder="Email for Results">
-            <p class="t-mono t-muted" style="text-align: left; line-height: 1.5; margin-top: 20px;">
-                <i class="fas fa-lock"></i> PRIVACY NOTICE: Your camera data is processed locally in RAM. Only the final text report is emailed.
-            </p>
-            <div style="width: 100%; text-align: right; margin-top: 30px;">
-                <button class="btn" onclick="App.submitIntake()">CONFIRM</button>
+    <div id="modal-intake" class="modal-overlay">
+        <div class="modal-box card">
+            <span class="t-mono t-muted">PATIENT CHECK-IN</span>
+            <div style="margin: 24px 0;">
+                <input type="text" id="in-name" class="input-field" placeholder="Full Name" style="margin-bottom:12px;">
+                <input type="email" id="in-email" class="input-field" placeholder="Email Address">
             </div>
+            <p class="t-mono t-muted" style="text-align: left; margin-top: 20px; font-size:10px;">
+                <i class="fas fa-lock"></i> PRIVACY: Processing is local. No biometrics stored.
+            </p>
+            <button class="btn" style="width:100%" onclick="App.submitIntake()">AUTHENTICATE</button>
         </div>
     </div>
 
-    <!-- 2. PROTOCOL SELECTION -->
-    <section id="v-triage" class="view" style="z-index: 30;">
+    <!-- 2. TRIAGE -->
+    <section id="v-triage" class="view">
         <div class="container center-col">
-            <div class="t-mono t-accent" style="margin-bottom: 40px;">SELECT TREATMENT PROTOCOL</div>
+            <div class="center-text" style="margin-bottom: 40px;">
+                <span class="t-mono t-accent">STEP 2 OF 3</span>
+                <h2 class="t-h2">SELECT CLINICAL PROTOCOL</h2>
+            </div>
             <div class="grid-3">
-                
                 <div class="card" onclick="App.selectProtocol('A')">
-                    <div><div class="t-mono t-accent">2:44 MINS</div><h3 class="t-h3" style="margin-top:12px;">ANXIETY</h3><p class="t-body" style="font-size:13px; margin-top:8px;">Vagal toning via respiratory synchronization.</p></div><div class="t-mono t-muted">PROTOCOL A</div>
+                    <div><span class="t-mono t-accent">2:44 MIN</span><h3 class="t-h3" style="margin-top:12px;">ANXIETY REGULATION</h3><p class="t-sm" style="margin-top:12px;">Uses fluid wave dynamics to lower heart rate and sympathetic arousal.</p></div><span class="t-mono t-muted">PROTOCOL A</span>
                 </div>
-                
                 <div class="card" onclick="App.selectProtocol('B')">
-                    <div><div class="t-mono t-accent">2:30 MINS</div><h3 class="t-h3" style="margin-top:12px;">STROKE / TREMOR</h3><p class="t-body" style="font-size:13px; margin-top:8px;">Neuro-motor calibration using movement grids.</p></div><div class="t-mono t-muted">PROTOCOL B</div>
+                    <div><span class="t-mono t-accent">2:30 MIN</span><h3 class="t-h3" style="margin-top:12px;">MOTOR STABILITY</h3><p class="t-sm" style="margin-top:12px;">Orthopedic grid lines help visualize and correct hand tremors.</p></div><span class="t-mono t-muted">PROTOCOL B</span>
                 </div>
-                
                 <div class="card" onclick="App.selectProtocol('C')">
-                    <div><div class="t-mono t-accent">2:59 MINS</div><h3 class="t-h3" style="margin-top:12px;">ADHD / FOCUS</h3><p class="t-body" style="font-size:13px; margin-top:8px;">Executive attention training via gaze locking.</p></div><div class="t-mono t-muted">PROTOCOL C</div>
+                    <div><span class="t-mono t-accent">2:59 MIN</span><h3 class="t-h3" style="margin-top:12px;">ATTENTION SPAN</h3><p class="t-sm" style="margin-top:12px;">High-contrast radar tunnel trains you to maintain gaze steadiness.</p></div><span class="t-mono t-muted">PROTOCOL C</span>
                 </div>
-                
                 <div class="card" onclick="App.selectProtocol('D')">
-                    <div><div class="t-mono t-accent">2:15 MINS</div><h3 class="t-h3" style="margin-top:12px;">DYSPRAXIA</h3><p class="t-body" style="font-size:13px; margin-top:8px;">Micro-mobility and fine coordination warmup.</p></div><div class="t-mono t-muted">PROTOCOL D</div>
+                    <div><span class="t-mono t-accent">2:15 MIN</span><h3 class="t-h3" style="margin-top:12px;">DYSPRAXIA COORD</h3><p class="t-sm" style="margin-top:12px;">Radial burst patterns to help with movement planning.</p></div><span class="t-mono t-muted">PROTOCOL D</span>
                 </div>
-                
                 <div class="card" onclick="App.selectProtocol('E')">
-                    <div><div class="t-mono t-accent">2:44 MINS</div><h3 class="t-h3" style="margin-top:12px;">SENSORY OVERLOAD</h3><p class="t-body" style="font-size:13px; margin-top:8px;">Low-stimulus flow for nervous system regulation.</p></div><div class="t-mono t-muted">PROTOCOL E</div>
+                    <div><span class="t-mono t-accent">2:44 MIN</span><h3 class="t-h3" style="margin-top:12px;">SENSORY REG</h3><p class="t-sm" style="margin-top:12px;">Low-stimulus flow field for nervous system grounding.</p></div><span class="t-mono t-muted">PROTOCOL E</span>
                 </div>
-                
                 <div class="card" onclick="App.selectProtocol('F')">
-                    <div><div class="t-mono t-accent">2:20 MINS</div><h3 class="t-h3" style="margin-top:12px;">COGNITIVE BURNOUT</h3><p class="t-body" style="font-size:13px; margin-top:8px;">Visual resetting to clear mental fatigue.</p></div><div class="t-mono t-muted">PROTOCOL F</div>
+                    <div><span class="t-mono t-accent">2:20 MIN</span><h3 class="t-h3" style="margin-top:12px;">BURNOUT RESET</h3><p class="t-sm" style="margin-top:12px;">Cognitive visual resetting to clear mental fatigue.</p></div><span class="t-mono t-muted">PROTOCOL F</span>
                 </div>
-
+            </div>
+            <div class="center-text" style="margin-top:40px;">
+                <button class="btn-ghost" onclick="UI.switch('v-landing')">← BACK</button>
             </div>
         </div>
     </section>
 
-    <!-- CALIBRATION MODAL (IMPROVED INSTRUCTIONS) -->
-    <div id="modal-calib" class="view" style="background: rgba(0,0,0,0.9); z-index: 100; align-items:center; justify-content:center;">
-        <div style="text-align:center; max-width: 600px; padding: 20px;">
-            <div class="t-mono t-accent" style="margin-bottom:20px;" id="calib-proto-name">PROTOCOL A</div>
-            <h1 class="t-hero" id="calib-countdown" style="font-size:80px;">5</h1>
-            
-            <div style="margin-top: 30px; border-top: 1px solid var(--border); padding-top: 30px;">
-                <p class="t-mono t-muted">INSTRUCTION</p>
-                <h2 class="t-h2" id="calib-instruction" style="margin-top: 10px;">Breathe with the pulse</h2>
-            </div>
-            
-            <p class="t-mono t-muted" style="margin-top: 40px; color: var(--accent);">BASELINING SENSORS... HOLD STEADY</p>
+    <!-- CALIBRATION MODAL -->
+    <div id="modal-calib" class="modal-overlay">
+        <div class="modal-box card" style="background: rgba(0,0,0,0.8); max-width:400px; text-align:center;">
+            <span class="t-mono t-accent">SENSOR CALIBRATION</span>
+            <div class="t-hero" id="calib-count" style="font-size: 80px; margin: 20px 0;">5</div>
+            <span class="t-mono t-muted">HOLD HAND STEADY</span>
         </div>
     </div>
 
-    <!-- 3. ACTIVE HUD -->
-    <div id="v-session" style="display:none;">
-        <div id="hud-layer">
-            <div class="hud-row" style="align-items: flex-start;">
-                <div>
-                    <div class="t-mono t-accent" id="hud-proto-id">PROTOCOL A</div>
-                    <div class="t-h3" id="hud-proto-name">ANXIETY REGULATION</div>
-                </div>
-                <div style="text-align: right;">
-                    <div class="big-val" id="hud-timer">00:00</div>
-                    <div class="t-mono t-muted">TIME REMAINING</div>
-                </div>
+    <!-- 3. SESSION HUD -->
+    <div id="hud">
+        <div class="hud-row">
+            <div>
+                <span class="t-mono t-accent" id="hud-pid">PROTOCOL</span>
+                <div class="t-h2" id="hud-name">NAME</div>
             </div>
-            <div class="hud-row">
-                <div>
-                    <div class="t-mono" style="margin-bottom: 8px;">LIVE FEEDBACK</div>
-                    <div class="t-h3 t-accent" id="hud-instruction">SYNCHRONIZE BREATH</div>
-                </div>
-                <div style="text-align: right;">
-                    <div class="big-val" id="hud-metric">--</div>
-                    <div class="t-mono t-muted" id="hud-metric-label">VAGAL STABILITY</div>
-                </div>
+            <div style="text-align: right;">
+                <span class="metric-big" id="hud-time">00:00</span>
+                <span class="t-mono t-muted" style="display:block">REMAINING</span>
+            </div>
+        </div>
+        <div class="hud-row">
+            <div>
+                <span class="t-mono t-muted">INSTRUCTION</span>
+                <div class="t-h3 t-accent" id="hud-advice">...</div>
+            </div>
+            <div style="text-align: right;">
+                <span class="metric-big" id="hud-val">--</span>
+                <span class="t-mono t-muted" style="display:block">STABILITY INDEX</span>
             </div>
         </div>
     </div>
 
-    <!-- 4. RESULTS DASHBOARD -->
-    <section id="v-debrief" class="view" style="z-index: 40; background: var(--bg-base);">
-        <div class="container" style="padding-top: 60px;">
-            <div class="t-mono t-accent" style="margin-bottom: 20px;">SESSION ANALYSIS COMPLETE</div>
-            <h1 class="t-hero">YOUR RESULTS</h1>
-            
+    <!-- 4. DEBRIEF -->
+    <section id="v-debrief" class="view">
+        <div class="container">
+            <div class="center-text" style="margin-bottom: 40px;">
+                <span class="t-mono t-success">SESSION COMPLETE</span>
+                <h2 class="t-h2">INTELLIGENCE REPORT</h2>
+            </div>
             <div class="dash-grid">
                 <div>
-                    <div class="insight-panel">
-                        <div class="t-mono t-muted" style="margin-bottom: 12px;">CLINICAL OBSERVATION</div>
-                        <p class="t-body" style="font-size: 18px; color: var(--text-pri); line-height: 1.6;" id="res-text">Calculating...</p>
-                    </div>
-                    <div style="margin-top: 30px;">
-                        <div class="stat-row">
-                            <span class="t-body">Start Baseline (Stress)</span>
-                            <span class="t-mono" id="res-start">0.00</span>
-                        </div>
-                        <div class="stat-row">
-                            <span class="t-body">End State (Stress)</span>
-                            <span class="t-mono t-accent" id="res-end">0.00</span>
-                        </div>
-                        <div class="stat-row" style="border:none;">
-                            <span class="t-body">Total Improvement</span>
-                            <span class="t-mono t-accent" id="res-delta">+0%</span>
+                    <div class="card" style="border-left: 4px solid var(--accent);">
+                        <span class="t-mono t-muted">CLINICAL OBSERVATION</span>
+                        <p class="t-body" style="font-size: 18px; color: var(--text-pri); margin-top: 10px;" id="res-text">Processing...</p>
+                        <div style="margin-top: 20px; background: rgba(255,255,255,0.05); padding: 16px; border-radius: var(--radius);">
+                            <span class="t-mono t-accent">WHY THIS MATTERS</span>
+                            <p class="t-sm" style="margin-top:8px;" id="res-explain">...</p>
                         </div>
                     </div>
-                    <div style="margin-top: 40px; border: 1px solid var(--border); padding: 16px; border-radius: var(--radius);">
-                        <p class="t-mono t-muted"><i class="fas fa-check"></i> REPORT SENT TO: <span id="res-email" style="color:var(--text-pri)"></span></p>
+                    <div style="margin-top:24px; padding:20px; border:1px solid var(--border); border-radius: var(--radius);">
+                        <span class="t-mono t-muted">REPORT STATUS</span>
+                        <p class="t-sm" style="margin-top:4px;">Report sent to: <span id="res-email" style="color:var(--text-pri)"></span> <span id="mail-status" style="margin-left:10px;">(Sending...)</span></p>
                     </div>
                 </div>
-                <div style="display:flex; flex-direction:column; justify-content:space-between;">
-                    <div class="card" style="height: 100%;">
-                        <div class="t-mono t-muted">SESSION TREND</div>
-                        <div class="chart-box" id="res-chart"></div>
-                        <p class="t-mono" style="text-align: center; margin-top: 10px;">CONSISTENCY: <span class="t-accent">HIGH</span></p>
+                <div>
+                    <div class="card" style="height: 100%; justify-content:flex-end;">
+                        <span class="t-mono t-muted">NET IMPROVEMENT</span>
+                        <span class="metric-big t-accent" id="res-score">+0%</span>
+                        <div style="height: 100px; display:flex; align-items:flex-end; gap:4px; margin-top:24px;" id="res-chart"></div>
+                        <span class="t-mono t-muted" style="margin-top:10px; display:block;">STABILITY OVER TIME</span>
                     </div>
                 </div>
             </div>
-            <div style="margin-top: 60px; text-align: center;">
+            <div class="center-text" style="margin-top: 60px;">
                 <button class="btn-ghost" onclick="window.location.reload()">RETURN TO MENU</button>
             </div>
         </div>
     </section>
 
-    <!-- LOGIC -->
     <script>
-        const PROTOCOLS = {
-            'A': { name: 'ANXIETY / CALM', time: 164, type: 'A', label: 'NERVOUS SYSTEM CALMNESS', advice: 'Match breathing to the visual pulse' },
-            'B': { name: 'STROKE / MOTOR', time: 150, type: 'B', label: 'MOVEMENT STEADINESS', advice: 'Sweep your hand slowly across the grid' },
-            'C': { name: 'ADHD / FOCUS', time: 179, type: 'C', label: 'ATTENTION STAMINA', advice: 'Keep your gaze/hand in the center tunnel' },
-            'D': { name: 'DYSPRAXIA / MOBILITY', time: 135, type: 'B', label: 'COORDINATION INDEX', advice: 'Trace the grid lines gently' },
-            'E': { name: 'ASD / SENSORY', time: 164, type: 'A', label: 'SENSORY LOAD', advice: 'Focus on the flow, relax your shoulders' },
-            'F': { name: 'BURNOUT / RESET', time: 140, type: 'C', label: 'COGNITIVE CLARITY', advice: 'Let your thoughts drift with the tunnel' }
+        // --- 1. EMAIL CONFIGURATION ---
+        (function(){
+            // Public Key
+            emailjs.init("KHTzvT8_pB_9tNoQE"); 
+        })();
+
+        // --- 2. CONFIGURATION ---
+        const CONFIG = {
+            'A': { 
+                name: 'ANXIETY REGULATION', time: 164, mode: 'WAVE', label: 'VAGAL STABILITY', 
+                advice: 'Sync breathing with the waves.',
+                desc: 'Measures reduction in autonomic jitter (micro-tremors). High scores indicate a successful shift to "Rest and Digest" state.'
+            },
+            'B': { 
+                name: 'NEURO-MOTOR CALIB', time: 150, mode: 'GRID', label: 'KINEMATIC SMOOTHNESS', 
+                advice: 'Move slowly across the grid.',
+                desc: 'Represents movement smoothness. Improvement suggests better motor cortex signal firing and reduced tremor artifacts.'
+            },
+            'C': { 
+                name: 'ATTENTION LOCK', time: 179, mode: 'TUNNEL', label: 'FOCUS STAMINA', 
+                advice: 'Keep hand in center.',
+                desc: 'Tracks centered attention sustainability. High scores correlate with improved working memory and executive function.'
+            },
+            'D': { 
+                name: 'DYSPRAXIA COORD', time: 135, mode: 'RADIAL', label: 'PATH ACCURACY', 
+                advice: 'Trace the lines outward.',
+                desc: 'Measures ability to move in straight lines without deviation. Strengthening these pathways helps with fine motor skills.'
+            },
+            'E': { 
+                name: 'SENSORY REG', time: 164, mode: 'WAVE', label: 'SENSORY LOAD', 
+                advice: 'Relax gaze. Follow the flow.',
+                desc: 'Visuals simplified to reduce cognitive load. Improvement suggests effective self-regulation of sensory input.'
+            },
+            'F': { 
+                name: 'BURNOUT RESET', time: 140, mode: 'TUNNEL', label: 'COGNITIVE CLEARANCE', 
+                advice: 'Let thoughts drift.',
+                desc: 'Uses "visual wiping" to clear working memory fatigue. Positive scores suggest a reduction in cognitive resistance.'
+            }
         };
 
-        const State = {
-            user: { name: '', email: '' },
-            protocol: null, 
-            active: false, 
-            calibration: 0,
-            history: []
-        };
+        const State = { user:{name:'',email:''}, protocol:null, active:false, calibration:0.5, history:[] };
 
-        // --- SENTINEL AI ---
+        // --- 3. SENTINEL INTELLIGENCE ---
         const Sentinel = {
-            analyze: (dataPoints, protocolType) => {
-                const mean = dataPoints.reduce((a,b)=>a+b,0) / dataPoints.length;
-                const variance = dataPoints.reduce((a,b) => a + Math.pow(b-mean, 2), 0) / dataPoints.length;
-                const stdDev = Math.sqrt(variance);
-
-                const split = Math.floor(dataPoints.length / 2);
-                const first = dataPoints.slice(0, split).reduce((a,b)=>a+b,0) / split;
-                const second = dataPoints.slice(split).reduce((a,b)=>a+b,0) / split;
-                const improvement = first - second; 
-
-                let obs = [];
+            analyze: (data) => {
+                const n = data.length;
+                const win = Math.floor(n * 0.1) || 5;
+                const start = data.slice(0, win).reduce((a,b)=>a+b,0)/win || 0.5;
+                const end = data.slice(-win).reduce((a,b)=>a+b,0)/win || 0.5;
+                let delta = ((end - start) / start) * 100;
+                
+                // Narrative Gen
+                let obs = "";
                 let risk = "LOW";
-
-                if (stdDev > 0.3) {
-                    obs.push("High volatility detected in movement patterns.");
+                if(delta > 10) obs = "Significant stabilization detected. Your nervous system regulated effectively.";
+                else if(end < start - 0.1) {
+                    obs = "Signs of fatigue detected. You started strong but stability decreased.";
                     risk = "MODERATE";
                 }
-                if (improvement < -0.1) {
-                    obs.push("Signs of rapid neuromuscular fatigue detected.");
-                    risk = "MODERATE";
-                }
-                if(obs.length === 0) obs.push("No motor or cognitive anomalies detected.");
+                else obs = "Performance remained stable. Consistent baseline maintenance.";
 
-                return { observations: obs, risk: risk };
+                return { start, end, score: Math.floor(delta), text: obs, risk };
             }
         };
 
-        const Data = {
-            saveSession: (result, risk) => {
-                let history = JSON.parse(localStorage.getItem('zenith_history') || "[]");
-                history.push({ date: new Date().toISOString(), score: result, risk: risk });
-                localStorage.setItem('zenith_history', JSON.stringify(history));
-            },
-            getHistory: () => JSON.parse(localStorage.getItem('zenith_history') || "[]")
-        };
+        // --- 4. MAILER (UPDATED PARAMS) ---
+        const Mailer = {
+            send: (result) => {
+                const statusEl = document.getElementById('mail-status');
+                
+                const serviceID = "service_wpwe6kc"; 
+                const templateID = "template_d8oxo67";
 
-        const Voice = {
-            say: (msg) => {
-                if(window.speechSynthesis) {
-                    const u = new SpeechSynthesisUtterance(msg);
-                    u.rate = 1.0; u.pitch = 1.0;
-                    window.speechSynthesis.speak(u);
-                }
+                const params = {
+                    to_name: State.user.name,
+                    to_email: State.user.email,
+                    protocol: CONFIG[State.protocol].name,
+                    score: (result.score>0?'+':'')+result.score+'%',
+                    // Clinical Table Data
+                    start_val: result.start.toFixed(2),
+                    end_val: result.end.toFixed(2),
+                    risk_label: result.risk,
+                    insight: result.text,
+                    date: new Date().toLocaleDateString()
+                };
+
+                emailjs.send(serviceID, templateID, params)
+                    .then(() => {
+                        statusEl.innerText = "(Sent Successfully)";
+                        statusEl.style.color = "var(--success)";
+                    })
+                    .catch((err) => {
+                        console.warn('Email check:', err);
+                        statusEl.innerText = "(Error - Check IDs)"; 
+                        statusEl.style.color = "var(--alert)"; 
+                    });
             }
         };
 
-        const App = {
-            init: () => Theme.apply(),
-
-            submitIntake: () => {
-                const n = document.getElementById('in-name').value;
-                const e = document.getElementById('in-email').value;
-                if(!n || !e) return alert("Please complete check-in.");
-                State.user = { name: n, email: e };
-                Voice.say(`Welcome, ${n}. Protocol selection active.`);
-                UI.switch('v-triage');
-                Vision.init(); 
-            },
-
-            selectProtocol: (pid) => {
-                State.protocol = pid;
-                const conf = PROTOCOLS[pid];
-                
-                // UPDATE INSTRUCTIONS UI BEFORE CALIBRATION
-                document.getElementById('calib-proto-name').innerText = `PROTOCOL ${pid}: ${conf.name}`;
-                document.getElementById('calib-instruction').innerText = conf.advice;
-                
-                UI.showModal('modal-calib');
-                Voice.say(`Protocol ${pid} selected. ${conf.advice}. Calibrating.`);
-                
-                let count = 5;
-                let calReadings = [];
-                const int = setInterval(() => {
-                    count--;
-                    document.getElementById('calib-countdown').innerText = count;
-                    calReadings.push(Vision.stress);
-                    if(count <= 0) {
-                        clearInterval(int);
-                        const baseline = calReadings.reduce((a,b)=>a+b,0)/calReadings.length || 0.5;
-                        State.calibration = baseline;
-                        UI.hideModal('modal-calib');
-                        App.runSession(pid);
-                    }
-                }, 1000);
-            },
-
-            runSession: (pid) => {
-                const conf = PROTOCOLS[pid];
-                document.getElementById('hud-proto-id').innerText = `PROTOCOL ${pid}`;
-                document.getElementById('hud-proto-name').innerText = conf.name;
-                document.getElementById('hud-metric-label').innerText = conf.label;
-                document.getElementById('hud-instruction').innerText = conf.advice;
-                
-                Visuals.setType(conf.type);
-                State.active = true;
-                Voice.say("Session started. Begin.");
-                
-                let duration = conf.time;
-                State.history = []; 
-                UI.switch('v-session');
-                
-                const sessInt = setInterval(() => {
-                    duration--;
-                    const m = Math.floor(duration/60);
-                    const s = (duration%60).toString().padStart(2,'0');
-                    document.getElementById('hud-timer').innerText = `0${m}:${s}`;
-                    
-                    let metric = Math.max(0, Vision.stress);
-                    State.history.push(metric);
-                    document.getElementById('hud-metric').innerText = Math.floor((1-metric) * 100) + '%';
-
-                    if(duration <= 0) {
-                        clearInterval(sessInt);
-                        App.endSession();
-                    }
-                }, 1000);
-            },
-
-            endSession: () => {
-                State.active = false;
-                Voice.say("Session complete. Processing report.");
-                document.getElementById('canvas-layer').style.opacity = 0;
-                Results.generate();
-                UI.switch('v-debrief');
-            }
-        };
-
-        const Results = {
-            generate: () => {
-                const data = State.history;
-                const startAvg = data.slice(0, 5).reduce((a,b)=>a+b,0) / 5 || 0.5;
-                const endAvg = data.slice(-5).reduce((a,b)=>a+b,0) / 5 || 0.5;
-                
-                let improvement = Math.floor(((startAvg - endAvg) / startAvg) * 100);
-                if(!isFinite(improvement)) improvement = 0;
-
-                const p = PROTOCOLS[State.protocol];
-                const analysis = Sentinel.analyze(data, State.protocol);
-                
-                let text = `Primary Observation: Your ${p.label.toLowerCase()} improved by ${improvement}%. \n\nCLINICAL NOTES:\n`;
-                analysis.observations.forEach(o => text += `• ${o}\n`);
-
-                const panel = document.querySelector('.insight-panel');
-                if(analysis.risk === 'MODERATE') {
-                    panel.style.borderLeftColor = 'var(--alert)';
-                    text += "\nRECOMMENDATION: Share results with provider.";
-                } else {
-                    panel.style.borderLeftColor = 'var(--success)';
-                }
-
-                document.getElementById('res-text').innerText = text;
-                document.getElementById('res-start').innerText = startAvg.toFixed(2);
-                document.getElementById('res-end').innerText = endAvg.toFixed(2);
-                document.getElementById('res-delta').innerText = (improvement>0?'+':'') + improvement + '%';
-                document.getElementById('res-email').innerText = State.user.email;
-                
-                Data.saveSession(improvement, analysis.risk);
-
-                const chart = document.getElementById('res-chart');
-                chart.innerHTML = '';
-                const step = Math.floor(data.length / 10) || 1;
-                for(let i=0; i<10; i++) {
-                    const val = 1 - (data[i*step] || 0.5);
-                    const h = Math.min(100, Math.max(10, val * 100));
-                    const div = document.createElement('div');
-                    div.className = 'chart-bar';
-                    div.style.height = h + '%';
-                    chart.appendChild(div);
-                    setTimeout(()=> div.classList.add('current'), i*100);
-                }
-            }
-        };
-
+        // --- 5. VISUAL ENGINE ---
         const Visuals = {
-            scene: null, camera: null, renderer: null, points: null, mode: 'A',
+            scene: null, cam: null, ren: null, mesh: null,
+            uniforms: { uTime: {value:0}, uStress: {value:0}, uColor: {value:new THREE.Color(0x00A3FF)} },
+            
             init: () => {
                 Visuals.scene = new THREE.Scene();
                 Visuals.scene.fog = new THREE.FogExp2(0x050505, 0.002);
-                Visuals.camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
-                Visuals.camera.position.z = 50;
+                Visuals.cam = new THREE.PerspectiveCamera(60, innerWidth/innerHeight, 0.1, 1000);
+                Visuals.cam.position.set(0, 10, 40);
+                Visuals.cam.lookAt(0,0,0);
+                Visuals.ren = new THREE.WebGLRenderer({antialias:true, alpha:true});
+                Visuals.ren.setSize(innerWidth, innerHeight);
+                Visuals.ren.setPixelRatio(Math.min(devicePixelRatio, 1.5));
+                document.getElementById('canvas-layer').appendChild(Visuals.ren.domElement);
                 
-                Visuals.renderer = new THREE.WebGLRenderer({antialias:true, alpha:true});
-                Visuals.renderer.setSize(window.innerWidth, window.innerHeight);
-                document.getElementById('canvas-layer').appendChild(Visuals.renderer.domElement);
-                
-                const geo = new THREE.BufferGeometry();
-                const pos = new Float32Array(5000 * 3);
-                geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-                const mat = new THREE.PointsMaterial({size: 0.4, color: 0xffffff, transparent:true, opacity:0.8});
-                Visuals.points = new THREE.Points(geo, mat);
-                Visuals.scene.add(Visuals.points);
-                Visuals.animate();
-            },
-            setType: (type) => {
-                Visuals.mode = type;
-                document.getElementById('canvas-layer').style.opacity = 1;
-            },
-            animate: () => {
-                requestAnimationFrame(Visuals.animate);
-                if(!State.active) return;
-                
-                const time = Date.now() * 0.001;
-                const stress = Vision.stress;
-                const positions = Visuals.points.geometry.attributes.position.array;
-                
-                const isLight = document.documentElement.getAttribute('data-theme') === 'light';
-                const baseColor = isLight ? 0.1 : 1.0; 
-                Visuals.points.material.color.setScalar(baseColor);
-                Visuals.points.material.color.g = Math.max(0, 1 - stress); 
-                Visuals.points.material.color.b = Math.max(0, 1 - stress); 
+                // Texture Gen
+                const canvas = document.createElement('canvas'); canvas.width=32; canvas.height=32;
+                const ctx = canvas.getContext('2d');
+                const g = ctx.createRadialGradient(16,16,0,16,16,16);
+                g.addColorStop(0,'rgba(255,255,255,1)'); g.addColorStop(1,'rgba(255,255,255,0)');
+                ctx.fillStyle=g; ctx.fillRect(0,0,32,32);
+                const tex = new THREE.CanvasTexture(canvas);
 
-                for(let i=0; i<5000; i++) {
-                    const i3 = i*3;
-                    let x, y, z;
-                    
-                    if(Visuals.mode === 'A') { // SPHERE
-                        const r = 25 + Math.sin(time * 0.6) * 5; 
-                        const phi = Math.acos(-1 + (2*i)/5000);
-                        const th = Math.sqrt(5000 * Math.PI) * phi;
-                        x = r * Math.sin(phi) * Math.cos(th); y = r * Math.sin(phi) * Math.sin(th); z = r * Math.cos(phi);
-                        if(stress > 0.5 && Math.random() > 0.9) { x+=1; y+=1; }
-                    } else if (Visuals.mode === 'B') { // GRID
-                        const w = 150; const dim = 70;
-                        const r = Math.floor(i/dim); const c = i%dim;
-                        x = (c/dim - 0.5) * w; z = (r/dim - 0.5) * w;
-                        y = Math.sin(x*0.1 + time)*5 + Math.sin(z*0.1 + time)*5;
-                        if(stress > 0.5) y = y * 0.2 + (Math.random()); 
-                    } else { // TUNNEL
-                        const ang = (i/5000) * Math.PI * 40; const rad = 10 + (i%5)*3;
-                        x = Math.cos(ang)*rad; y = Math.sin(ang)*rad;
-                        let speed = 2 + (stress*5); z = (i * 0.1 + time * 10 * speed) % 100; z -= 50;
-                    }
-                    positions[i3] = x; positions[i3+1] = y; positions[i3+2] = z;
+                const count = 15000;
+                const geo = new THREE.InstancedBufferGeometry();
+                geo.copy(new THREE.PlaneBufferGeometry(0.3, 0.3));
+                const pos = new Float32Array(count*3);
+                for(let i=0; i<count*3; i++) pos[i] = (Math.random()-0.5)*150;
+                geo.setAttribute('aOffset', new THREE.InstancedBufferAttribute(pos,3));
+                geo.setAttribute('aIdx', new THREE.InstancedBufferAttribute(new Float32Array(count).map((_,i)=>i),1));
+
+                const mat = new THREE.ShaderMaterial({
+                    uniforms: { ...Visuals.uniforms, uTex: {value:tex} },
+                    transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
+                    defines: { MODE_WAVE: '' },
+                    vertexShader: `
+                        uniform float uTime; uniform float uStress;
+                        attribute vec3 aOffset; attribute float aIdx;
+                        varying float vAlpha;
+                        void main() {
+                            vec3 p = aOffset;
+                            #ifdef MODE_WAVE
+                                float y = sin(p.x*0.1 + uTime)*3.0 + cos(p.z*0.1 + uTime*0.5)*3.0;
+                                p.y = y + (fract(sin(aIdx)*43.54)-0.5)*uStress*10.0;
+                            #endif
+                            #ifdef MODE_GRID
+                                p.x = floor(p.x/2.0)*2.0; p.z = floor(p.z/2.0)*2.0;
+                                p.y = sin(p.x*0.5)*cos(p.z*0.5 + uTime*5.0) * uStress * 15.0;
+                            #endif
+                            #ifdef MODE_TUNNEL
+                                float a = aIdx*0.1; float r = 10.0 + mod(aIdx, 5.0) * 5.0;
+                                p.x = cos(a)*r; p.y = sin(a)*r;
+                                p.z = mod(aOffset.z + uTime*30.0, 100.0) - 50.0;
+                                if(uStress > 0.3) p.xy *= 1.0 + sin(p.z*0.2)*uStress;
+                            #endif
+                            #ifdef MODE_RADIAL
+                                float ang = (aIdx/15000.0)*6.28*20.0; float rad = mod(aIdx, 60.0);
+                                p.x = cos(ang)*rad; p.y = sin(ang)*rad; p.z=0.0;
+                                if(uStress>0.2) p.x += (fract(sin(aIdx))-0.5);
+                            #endif
+                            vec4 mv = modelViewMatrix * vec4(p,1.0);
+                            gl_Position = projectionMatrix * mv;
+                            gl_PointSize = (400.0 / -mv.z);
+                            vAlpha = 1.0 - (length(p)/80.0);
+                        }
+                    `,
+                    fragmentShader: `
+                        uniform vec3 uColor; uniform sampler2D uTex; varying float vAlpha;
+                        void main() { gl_FragColor = vec4(uColor, vAlpha) * texture2D(uTex, gl_PointCoord); }
+                    `
+                });
+                
+                Visuals.mesh = new THREE.Mesh(geo, mat);
+                Visuals.scene.add(Visuals.mesh);
+                Visuals.loop();
+            },
+            setMode: (mode) => {
+                if(!Visuals.mesh) return;
+                const m = Visuals.mesh.material;
+                m.defines = {};
+                m.defines[`MODE_${mode}`] = '';
+                m.needsUpdate = true;
+            },
+            loop: () => {
+                requestAnimationFrame(Visuals.loop);
+                if(State.active || document.getElementById('v-landing').style.display === 'block') {
+                    Visuals.uniforms.uTime.value = performance.now()*0.001;
+                    Visuals.uniforms.uStress.value = Vision.val;
+                    Visuals.ren.render(Visuals.scene, Visuals.cam);
                 }
-                Visuals.points.geometry.attributes.position.needsUpdate = true;
-                Visuals.renderer.render(Visuals.scene, Visuals.camera);
             }
         };
 
+        // --- VISION ---
         const Vision = {
-            stress: 0, lastPos: {x:0, y:0},
+            val: 0, last: {x:0, y:0},
             init: () => {
-                const vid = document.getElementById('input_video');
-                const hands = new Hands({locateFile: f=>`https://cdn.jsdelivr.net/npm/@mediapipe/hands/${f}`});
-                hands.setOptions({maxNumHands: 1, modelComplexity: 0, minDetectionConfidence: 0.5});
-                hands.onResults(res => {
-                    if(res.multiHandLandmarks.length > 0) {
-                        const lm = res.multiHandLandmarks[0];
-                        const w = lm[0];
-                        const dist = Math.hypot(w.x - Vision.lastPos.x, w.y - Vision.lastPos.y);
-                        // Stress factor calc
-                        Vision.stress = (Vision.stress * 0.9) + (dist * 20 * 0.1);
-                        Vision.lastPos = {x: w.x, y: w.y};
-                    } else { Vision.stress *= 0.95; }
+                const h = new Hands({locateFile:f=>`https://cdn.jsdelivr.net/npm/@mediapipe/hands/${f}`});
+                h.setOptions({maxNumHands:1, modelComplexity:0});
+                h.onResults(res => {
+                    if(res.multiHandLandmarks.length>0) {
+                        const w = res.multiHandLandmarks[0][0];
+                        const d = Math.hypot(w.x-Vision.last.x, w.y-Vision.last.y);
+                        Vision.val = (Vision.val*0.9) + (d*80*0.1);
+                        Vision.last = {x:w.x, y:w.y};
+                    } else Vision.val *= 0.95;
                 });
-                const camera = new Camera(vid, {
-                    onFrame: async () => await hands.send({image: vid}),
-                    width: 640, height: 480
+                const c = new Camera(document.getElementById('input_video'), {
+                    onFrame: async()=>await h.send({image:document.getElementById('input_video')}), width:640, height:480
                 });
-                camera.start();
+                c.start();
                 Visuals.init();
             }
         };
 
-        const Theme = {
-            current: 'dark',
-            toggle: () => {
-                Theme.current = Theme.current === 'dark' ? 'light' : 'dark';
-                Theme.apply();
+        // --- APP FLOW ---
+        const App = {
+            submitIntake: () => {
+                const n = document.getElementById('in-name');
+                const e = document.getElementById('in-email');
+                if(!n.value) return;
+                State.user = {name:n.value, email:e.value};
+                UI.closeModal('modal-intake');
+                UI.switch('v-triage');
+                Vision.init(); 
             },
-            apply: () => document.documentElement.setAttribute('data-theme', Theme.current)
+            selectProtocol: (pid) => {
+                State.protocol = pid;
+                UI.showModal('modal-calib');
+                let t = 5;
+                const int = setInterval(()=>{
+                    t--; document.getElementById('calib-count').innerText=t;
+                    if(t<=0){
+                        clearInterval(int);
+                        State.calibration = Math.max(0.1, Vision.val);
+                        UI.closeModal('modal-calib');
+                        App.run(pid);
+                    }
+                },1000);
+            },
+            run: (pid) => {
+                const c = CONFIG[pid];
+                document.getElementById('hud-name').innerText = c.name;
+                document.getElementById('hud-pid').innerText = `PROTOCOL ${pid}`;
+                document.getElementById('hud-advice').innerText = c.advice;
+                document.getElementById('hud-label').innerText = c.label;
+                
+                Visuals.setMode(c.mode);
+                State.active = true;
+                State.history = [];
+                
+                UI.switch('null'); 
+                document.getElementById('hud').classList.add('active');
+                
+                let dur = c.time;
+                App.timer = setInterval(()=>{
+                    dur--;
+                    const m=Math.floor(dur/60), s=(dur%60).toString().padStart(2,'0');
+                    document.getElementById('hud-time').innerText = `0${m}:${s}`;
+                    
+                    const stability = Math.max(0, 1 - (Vision.val / (State.calibration*3)));
+                    State.history.push(stability);
+                    document.getElementById('hud-val').innerText = Math.floor(stability*100) + '%';
+
+                    if(dur<=0) App.end();
+                },1000);
+            },
+            end: () => {
+                clearInterval(App.timer);
+                State.active = false;
+                document.getElementById('hud').classList.remove('active');
+                
+                const res = Sentinel.analyze(State.history);
+                const conf = CONFIG[State.protocol];
+                
+                document.getElementById('res-score').innerText = (res.score>0?'+':'')+Math.floor(res.score)+'%';
+                document.getElementById('res-text').innerText = res.text;
+                document.getElementById('res-explain').innerText = conf.desc;
+                document.getElementById('res-email').innerText = State.user.email;
+
+                // TRIGGER EMAIL
+                Mailer.send(res);
+
+                // Chart
+                const chart = document.getElementById('res-chart');
+                chart.innerHTML = '';
+                const step = Math.floor(res.data?res.data.length/20:State.history.length/20)||1;
+                const source = State.history;
+                for(let i=0; i<20; i++){
+                    const v = source[i*step]||0.5;
+                    const d = document.createElement('div');
+                    d.className = 'chart-bar';
+                    d.style.height = (v*100)+'%';
+                    chart.appendChild(d);
+                    setTimeout(()=>d.classList.add('filled'), i*50);
+                }
+
+                UI.switch('v-debrief');
+            }
+        };
+
+        const Theme = {
+            toggle: () => {
+                const el = document.documentElement;
+                const light = el.getAttribute('data-theme')==='light';
+                el.setAttribute('data-theme', light ? 'dark' : 'light');
+                const c = light ? 0x00A3FF : 0x0066CC;
+                const f = light ? 0x050505 : 0xF5F7FA;
+                if(Visuals.uniforms) Visuals.uniforms.uColor.value.setHex(c);
+                if(Visuals.scene) Visuals.scene.fog.color.setHex(f);
+            }
         };
 
         const UI = {
             switch: (id) => {
-                document.querySelectorAll('.view').forEach(v => {
-                    v.classList.remove('active');
-                    if(id !== 'v-session' && v.id !== id) v.style.display = 'none';
-                });
-                const t = document.getElementById(id);
-                t.style.display = 'block';
-                setTimeout(()=>t.classList.add('active'), 50);
-                if(id === 'v-session') {
-                    document.getElementById('v-session').style.display = 'block';
-                    document.getElementById('canvas-layer').style.opacity = 1;
-                } else {
-                    document.getElementById('v-session').style.display = 'none';
-                    document.getElementById('canvas-layer').style.opacity = 0;
+                document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+                if(id!=='null') {
+                    const el = document.getElementById(id);
+                    el.style.display = 'block'; 
+                    setTimeout(()=>el.classList.add('active'), 10);
                 }
+                document.getElementById('canvas-layer').style.opacity = (id==='null') ? 1 : 0.3;
             },
-            showModal: (id) => {
-                const el = document.getElementById(id);
-                el.style.display = 'flex';
-                setTimeout(()=>el.classList.add('active'), 10);
-            },
-            hideModal: (id) => {
-                const el = document.getElementById(id);
-                el.classList.remove('active');
-                setTimeout(()=>el.style.display = 'none', 500);
-            }
+            showModal: (id) => document.getElementById(id).classList.add('active'),
+            closeModal: (id) => document.getElementById(id).classList.remove('active')
         };
 
-        App.init();
+        Visuals.init();
 
     </script>
 </body>
