@@ -358,10 +358,27 @@
 
         // Initialize EmailJS (wrapped in IIFE to prevent global pollution)
         (function(){
-            if (typeof emailjs !== 'undefined') {
-                emailjs.init("KHTzvT8_pB_9tNoQE");
+            // Wait for EmailJS to load if it's not immediately available
+            const initEmailJS = () => {
+                if (typeof emailjs !== 'undefined') {
+                    try {
+                        emailjs.init("KHTzvT8_pB_9tNoQE");
+                        console.log('EmailJS initialized successfully');
+                    } catch (error) {
+                        console.error('EmailJS initialization error:', error);
+                    }
+                } else {
+                    console.warn('EmailJS library not loaded - will retry');
+                    // Retry after a short delay
+                    setTimeout(initEmailJS, 500);
+                }
+            };
+            
+            // Try immediate initialization
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initEmailJS);
             } else {
-                console.warn('EmailJS library not loaded');
+                initEmailJS();
             }
         })();
 
@@ -472,19 +489,50 @@
                     return;
                 }
 
+                // Verify EmailJS is initialized before sending
+                if (!emailjs || typeof emailjs.send !== 'function') {
+                    console.error('EmailJS not properly initialized');
+                    stat.innerText = "Email Service Not Ready";
+                    stat.style.color = "var(--alert)";
+                    return;
+                }
+                
+                // Log parameters for debugging (without sensitive data)
+                console.log('Sending email with params:', {
+                    to_name: params.to_name,
+                    protocol: params.protocol,
+                    score: params.score,
+                    risk_label: params.risk_label,
+                    date: params.date
+                });
+                
                 emailjs.send("service_wpwe6kc", "template_d8oxo67", params)
-                    .then(() => {
+                    .then((response) => {
+                        console.log('EmailJS success:', response);
                         stat.innerText = "Sent Successfully";
                         stat.style.color = "var(--success)";
                     })
                     .catch((err) => {
+                        // Comprehensive error logging
                         console.error('EmailJS send error:', err);
-                        stat.innerText = "Connection Error (Check Console)";
-                        stat.style.color = "var(--alert)";
-                        // Log error details for debugging
-                        if (err.text) {
-                            console.error('EmailJS error details:', err.text);
+                        console.error('Error status:', err.status);
+                        console.error('Error text:', err.text);
+                        console.error('Full error object:', JSON.stringify(err, null, 2));
+                        
+                        // User-friendly error message
+                        let errorMsg = "Email Send Failed";
+                        if (err.status === 400) {
+                            errorMsg = "Invalid Template Parameters";
+                        } else if (err.status === 401) {
+                            errorMsg = "Email Service Authentication Failed";
+                        } else if (err.status === 404) {
+                            errorMsg = "Email Service Not Found";
+                        } else if (err.text) {
+                            errorMsg = `Error: ${err.text.substring(0, 50)}`;
                         }
+                        
+                        stat.innerText = errorMsg;
+                        stat.style.color = "var(--alert)";
                     });
             }
         };
@@ -746,16 +794,25 @@
                 
                 try {
                     Visuals.scene = new THREE.Scene();
-                    Visuals.scene.fog = new THREE.FogExp2(0x050505, 0.002);
-                    Visuals.camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
-                    Visuals.camera.position.z = 50;
+                    // Lighter fog for better visibility and aesthetics
+                    Visuals.scene.fog = new THREE.FogExp2(0x050505, 0.001);
+                    // Camera setup: Wider FOV and further back for better view
+                    Visuals.camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 1000);
+                    Visuals.camera.position.z = 80; // Move camera further back for better perspective
                     
-                    Visuals.renderer = new THREE.WebGLRenderer({antialias: true, alpha: true});
+                    Visuals.renderer = new THREE.WebGLRenderer({
+                        antialias: true, 
+                        alpha: true,
+                        powerPreference: "high-performance"
+                    });
                     Visuals.renderer.setSize(window.innerWidth, window.innerHeight);
                     
                     // Cap devicePixelRatio at 2.0 for performance optimization
                     const dpr = Math.min(window.devicePixelRatio || 1, 2.0);
                     Visuals.renderer.setPixelRatio(dpr);
+                    
+                    // Enable better rendering quality
+                    Visuals.renderer.setClearColor(0x050505, 0); // Transparent background
                     
                     const canvasEl = Visuals.renderer.domElement;
                     const canvasContainer = document.getElementById('canvas-layer');
@@ -771,19 +828,36 @@
                     const pos = new Float32Array(5000 * 3);
                     geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
                     
+                    // Initialize points with default positions (sphere pattern) so they're visible immediately
+                    const time = Date.now() * 0.001;
+                    for(let i=0; i<5000; i++) {
+                        const i3 = i*3;
+                        const r = 30; // Slightly larger sphere for better visibility from further camera
+                        const phi = Math.acos(-1 + (2*i)/5000);
+                        const th = Math.sqrt(5000 * Math.PI) * phi;
+                        pos[i3] = r * Math.sin(phi) * Math.cos(th);
+                        pos[i3+1] = r * Math.sin(phi) * Math.sin(th);
+                        pos[i3+2] = r * Math.cos(phi);
+                    }
+                    geo.attributes.position.needsUpdate = true;
+                    
                     // Use PointsMaterial with enhanced settings for reliable rendering
                     // PointsMaterial automatically handles matrix uniforms and point rendering
                     const mat = new THREE.PointsMaterial({
-                        size: 0.4,
-                        color: 0xffffff,
+                        size: 0.8, // Smaller size for sharper, cleaner appearance
+                        color: 0x00A3FF, // Start with medical cyan
                         transparent: true,
-                        opacity: 0.8,
+                        opacity: 0.85, // Good balance between visibility and subtlety
                         sizeAttenuation: true, // Points get smaller with distance
                         vertexColors: false
+                        // Using default blending (NormalBlending) for sharper appearance
                     });
                     
                     Visuals.points = new THREE.Points(geo, mat);
                     Visuals.scene.add(Visuals.points);
+                    
+                    // Render initial frame immediately
+                    Visuals.renderer.render(Visuals.scene, Visuals.camera);
                     
                     // Handle window resize
                     window.addEventListener('resize', () => {
@@ -801,15 +875,22 @@
             },
             setType: (type) => {
                 Visuals.mode = type;
-                document.getElementById('canvas-layer').style.opacity = 1;
+                const canvasLayer = document.getElementById('canvas-layer');
+                if (canvasLayer) {
+                    canvasLayer.style.opacity = 1;
+                    canvasLayer.classList.add('active');
+                }
             },
             animate: () => {
                 requestAnimationFrame(Visuals.animate);
-                if(!State.active || !Visuals.points) return;
+                if(!Visuals.points || !Visuals.renderer || !Visuals.scene || !Visuals.camera) return;
                 
                 const time = Date.now() * 0.001;
                 const stress = Vision.stress || 0;
                 const positions = Visuals.points.geometry.attributes.position.array;
+                
+                // Always render, even when State.active is false (show default visualization)
+                const isActive = State.active;
                 
                 // Medical color grading: Interpolate between Medical Cyan (#00A3FF) and Clinical Red (#FF3B30)
                 const isLight = document.documentElement.getAttribute('data-theme') === 'light';
@@ -829,28 +910,42 @@
                 // Update PointsMaterial color (works directly with material.color)
                 Visuals.points.material.color.copy(currentColor); 
 
+                // Update positions based on mode and active state
                 for(let i=0; i<5000; i++) {
                     const i3 = i*3;
                     let x, y, z;
                     
                     if(Visuals.mode === 'A') { // SPHERE
-                        const r = 25 + Math.sin(time * 0.6) * 5; 
+                        const r = 30 + (isActive ? Math.sin(time * 0.6) * 5 : 0); 
                         const phi = Math.acos(-1 + (2*i)/5000);
                         const th = Math.sqrt(5000 * Math.PI) * phi;
-                        x = r * Math.sin(phi) * Math.cos(th); y = r * Math.sin(phi) * Math.sin(th); z = r * Math.cos(phi);
-                        if(stress > 0.5 && Math.random() > 0.9) { x+=1; y+=1; }
+                        x = r * Math.sin(phi) * Math.cos(th); 
+                        y = r * Math.sin(phi) * Math.sin(th); 
+                        z = r * Math.cos(phi);
+                        if(isActive && stress > 0.5 && Math.random() > 0.9) { 
+                            x+=1; y+=1; 
+                        }
                     } else if (Visuals.mode === 'B') { // GRID
                         const w = 150; const dim = 70;
                         const r = Math.floor(i/dim); const c = i%dim;
-                        x = (c/dim - 0.5) * w; z = (r/dim - 0.5) * w;
-                        y = Math.sin(x*0.1 + time)*5 + Math.sin(z*0.1 + time)*5;
-                        if(stress > 0.5) y = y * 0.2 + (Math.random()); 
+                        x = (c/dim - 0.5) * w; 
+                        z = (r/dim - 0.5) * w;
+                        y = isActive ? (Math.sin(x*0.1 + time)*5 + Math.sin(z*0.1 + time)*5) : 0;
+                        if(isActive && stress > 0.5) {
+                            y = y * 0.2 + (Math.random()); 
+                        }
                     } else { // TUNNEL
-                        const ang = (i/5000) * Math.PI * 40; const rad = 10 + (i%5)*3;
-                        x = Math.cos(ang)*rad; y = Math.sin(ang)*rad;
-                        let speed = 2 + (stress*5); z = (i * 0.1 + time * 10 * speed) % 100; z -= 50;
+                        const ang = (i/5000) * Math.PI * 40; 
+                        const rad = 10 + (i%5)*3;
+                        x = Math.cos(ang)*rad; 
+                        y = Math.sin(ang)*rad;
+                        let speed = isActive ? (2 + (stress*5)) : 2;
+                        z = (i * 0.1 + time * 10 * speed) % 100; 
+                        z -= 50;
                     }
-                    positions[i3] = x; positions[i3+1] = y; positions[i3+2] = z;
+                    positions[i3] = x; 
+                    positions[i3+1] = y; 
+                    positions[i3+2] = z;
                 }
                 Visuals.points.geometry.attributes.position.needsUpdate = true;
                 Visuals.renderer.render(Visuals.scene, Visuals.camera);
